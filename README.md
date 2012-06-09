@@ -1,2 +1,0 @@
-wikipedia-vgi-spatialtemporal
-=============================
