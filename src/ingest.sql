@@ -3,19 +3,17 @@
 -- create all unique locations
 DROP TABLE IF EXISTS contrib_nodes_yyyymm;
 CREATE TABLE contrib_nodes_yyyymm AS
-SELECT      lang,  yyyy, mm, article_x AS x, article_y AS y, COUNT(*) AS n
-FROM        contrib_by_month
-GROUP BY    lang, yyyy, mm, article_x, article_y
-;
+SELECT      lang, yyyy, mm, x, y, COUNT(*) AS n
+FROM        (
+  SELECT      lang,  yyyy, mm, article_x AS x, article_y AS y
+  FROM        contrib_by_month
 
-INSERT INTO contrib_nodes_yyyymm
-SELECT      t.lang,  t.yyyy, t.mm, contrib_x AS x, contrib_y AS y, COUNT(*) AS n
-FROM        contrib_by_month t
-LEFT JOIN   contrib_nodes_yyyymm t1 ON (
-  t1.lang = t.lang AND t1.yyyy = t.yyyy AND t1.mm = t.mm AND 
-  t.contrib_x = t1.x AND t.contrib_y = t1.y)
-WHERE       t1.lang IS NULL
-GROUP BY    t.lang,  t.yyyy, t.mm, contrib_x, contrib_y
+  UNION
+  
+  SELECT      lang,  yyyy, mm, contrib_x AS x, contrib_y AS y
+  FROM        contrib_by_month
+) t
+GROUP BY lang, yyyy, mm, x, y
 ;
 
 ALTER TABLE contrib_nodes_yyyymm ADD COLUMN node_id serial NOT NULL PRIMARY KEY;
@@ -27,6 +25,13 @@ SET         geo_point = ST_MakePoint(x, y)
 ;
 
 SELECT COUNT(*) FROM contrib_nodes_yyyymm;
+
+
+
+
+
+
+
 
 -- create a table with the line segments for all contributions
 DROP TABLE IF EXISTS contrib_paths_yyyymm;
