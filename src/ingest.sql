@@ -38,7 +38,8 @@ SELECT COUNT(*) FROM contrib_nodes_yyyymm;
 DROP TABLE IF EXISTS contrib_paths_yyyymm;
 CREATE TABLE contrib_paths_yyyymm AS
 SELECT      t.lang,
-            t.yyyy, t.mm,
+            t.yyyy, 
+            t.mm,
             t1.node_id AS src,
             t2.node_id AS dst,
             COUNT(*) AS n,
