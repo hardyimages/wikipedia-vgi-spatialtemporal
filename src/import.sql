@@ -1,4 +1,5 @@
 \c hardy_db
+set role to hardy;
 
 DROP TABLE if exists contrib_by_month;
 CREATE TABLE contrib_by_month (

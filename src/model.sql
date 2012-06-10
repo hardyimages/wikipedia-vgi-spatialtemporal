@@ -1,4 +1,5 @@
 \c hardy_db
+set role to hardy;
 
 -- integrate all together into path summary table
 -- each path is the link plus contributions that traveled on it
@@ -7,8 +8,9 @@ CREATE TABLE contrib_flows_yyyymm AS
 SELECT        t.lang, 
               t.yyyy, 
               t.mm, 
-              p1.path_id, 
-              SUM(t.contrib_n)    AS n_contrib,
+              p1.path_id,
+              SUM(p1.n_contrib)   AS n_contrib,
+              SUM(p1.n)           AS n_path,
               COUNT(*)            AS n
 FROM          contrib_by_month as t
 JOIN          contrib_nodes_yyyymm t1 ON (t1.x = t.contrib_x AND t1.y = t.contrib_y AND t1.lang = t.lang)

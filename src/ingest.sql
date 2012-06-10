@@ -1,4 +1,5 @@
 \c hardy_db
+set role to hardy;
 
 -- create all unique locations
 DROP TABLE IF EXISTS contrib_nodes_yyyymm;
