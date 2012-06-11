@@ -18,8 +18,10 @@ SELECT    lang, yyyy, mm,
           COUNT(*) AS n_path,
           SUM(contrib_n * distance_km)/SUM(contrib_n) AS distance_mean_weighted,
           AVG(distance_km) AS distance_mean,
+          SUM(contrib_n) AS n_contrib,
           (SUM(contrib_n * distance_km)/SUM(contrib_n))/AVG(distance_km) AS distance_ratio,
-          SUM(contrib_n) AS n_contrib
+          SUM(contrib_n)/COUNT(*) AS contrib_ratio
+          
 FROM      contrib_flows t
 JOIN      contrib_paths p1 USING (path_id)
 GROUP BY  lang, yyyy, mm
@@ -35,7 +37,9 @@ SELECT    lang, yyyy,
           COUNT(DISTINCT mm) AS n_month,
           SUM(contrib_n * distance_km)/SUM(contrib_n) AS distance_mean_weighted,
           AVG(distance_km) AS distance_mean,
-          SUM(contrib_n) AS n_contrib
+          SUM(contrib_n) AS n_contrib,
+          (SUM(contrib_n * distance_km)/SUM(contrib_n))/AVG(distance_km) AS distance_ratio,
+          SUM(contrib_n)/COUNT(*) AS contrib_ratio
 FROM      contrib_flows t
 JOIN      contrib_paths p1 USING (path_id)
 GROUP BY  lang, yyyy
