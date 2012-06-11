@@ -1,22 +1,16 @@
 l <- Sys.getenv('WIKI_LANG', 'en')
 cat('processing lang', l, '...\n')
 
-x_contrib_summary <- read.csv('data/x_contrib_summary.csv')
-x_contrib_summary <- subset(x_contrib_summary, lang == l & n >= 10 & yyyy >= 2003 & yyyy <= 2008)
-x_contrib_summary <- within(x_contrib_summary, {
-  lang <- factor(lang)
-  distance_ratio <- distance_km_mean_weighted / distance_km_mean
+d <- read.csv('../data/x_contrib_flows.csv')
+d <- subset(d, lang == l)
+d <- within(d, {
+  distance_ratio <- distance_mean_weighted / distance_mean
 })
-summary(x_contrib_summary)
+summary(d)
 
-z <- x_contrib_summary[,c('yyyy','mm','n','n_contrib','distance_ratio')]
-z
-# m <- lm(distance_km_mean_weighted ~ distance_km_mean, data=d)
-# (coef(m)[['distance_km_mean']])
-# (summary(m))
-# (mean(d$distance_ratio))
-# (weighted.mean(d$distance_ratio, w=d$n))
-# boxplot(distance_ratio ~ yyyy, data=d)
-# plot(distance_km_mean_weighted ~ distance_km_mean, data=d)
-# abline(m, col='red')
-# hist(d$distance_ratio)
+m <- lm(distance_mean_weighted ~ distance_mean, data=d)
+summary(m)
+
+plot(distance_mean ~ distance_mean_weighted, data=d, xlim=c(min(d[,5:6]), max(d[,5:6])))
+abline(m, col='red')
+abline(a = 0, b = 1, col='blue')
