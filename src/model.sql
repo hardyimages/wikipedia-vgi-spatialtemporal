@@ -45,7 +45,7 @@ ALTER TABLE contrib_flows_yyyy ADD CONSTRAINT ux_contrib_flows_yyyy UNIQUE(lang,
 
 DROP TABLE IF EXISTS contrib_flows_yyyymm_extent;
 CREATE TABLE contrib_flows_yyyymm_extent AS
-SELECT    lang, yyyy, mm, ST_ConvexHull(ST_Collect(geo_linestring::geometry)) AS geo, COUNT(*) AS n
+SELECT    lang, yyyy, mm, SetSRID(ST_ConvexHull(ST_Collect(geo_linestring::geometry)),4326)::geography AS geo, COUNT(*) AS n
 FROM      contrib_flows t
 JOIN      contrib_paths p1 USING (path_id)
 GROUP BY  lang, yyyy, mm
