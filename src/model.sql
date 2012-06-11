@@ -32,6 +32,7 @@ DROP TABLE IF EXISTS contrib_flows_yyyy;
 CREATE TABLE contrib_flows_yyyy AS
 SELECT    lang, yyyy, 
           COUNT(*) AS n_path,
+          COUNT(DISTINCT mm) AS n_month,
           SUM(contrib_n * distance_km)/SUM(contrib_n) AS distance_mean_weighted,
           AVG(distance_km) AS distance_mean,
           SUM(contrib_n) AS n_contrib
@@ -42,5 +43,14 @@ GROUP BY  lang, yyyy
 
 ALTER TABLE contrib_flows_yyyy ADD CONSTRAINT ux_contrib_flows_yyyy UNIQUE(lang, yyyy);
 
+DROP TABLE IF EXISTS contrib_flows_yyyymm_extent;
+CREATE TABLE contrib_flows_yyyymm_extent AS
+SELECT    lang, yyyy, mm, ST_ConvexHull(ST_Collect(geo_linestring::geometry)) AS geo, COUNT(*) AS n
+FROM      contrib_flows t
+JOIN      contrib_paths p1 USING (path_id)
+GROUP BY  lang, yyyy, mm
+;
+
+ALTER TABLE contrib_flows_yyyymm_extent ADD CONSTRAINT ux_contrib_flows_yyyymm_extent UNIQUE(lang, yyyy, mm);
 
 
