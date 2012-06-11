@@ -55,3 +55,22 @@ WHERE     n1.node_id = p.node_id_src AND
 UPDATE    contrib_paths p
 SET       distance_km = ST_Length(geo_linestring)/1000.0
 ;
+
+DROP TABLE IF EXISTS contrib_flows;
+CREATE TABLE contrib_flows AS
+SELECT    lang, yyyy, mm, 
+          COUNT(path_id) AS n_path,
+          SUM(contrib_n * distance_km)/SUM(contrib_n) AS distance_mean_weighted,
+          AVG(distance_km) AS distance_mean,
+          SUM(contrib_n) AS n_contrib
+FROM      contrib_by_month t
+JOIN      contrib_nodes t1 ON (t1.x = t.contrib_x AND t1.y = t.contrib_y)
+JOIN      contrib_nodes t2 ON (t2.x = t.article_x AND t2.y = t.article_y)
+JOIN      contrib_paths p1 ON (p1.node_id_src = t1.node_id AND p1.node_id_dst = t2.node_id)
+GROUP BY  lang, yyyy, mm
+;
+
+ALTER TABLE contrib_flows ADD COLUMN flow_id serial NOT NULL PRIMARY KEY;
+ALTER TABLE contrib_flows ADD CONSTRAINT ux_contrib_flows UNIQUE(lang, yyyy, mm);
+
+
