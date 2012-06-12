@@ -1,17 +1,25 @@
-l <- Sys.getenv('WIKI_LANG', 'en')
-cat('processing lang', l, '...\n')
+results <- list()
+d.flows <- read.csv('../data/x_contrib_flows_yyyymm.csv')
+head(d.flows)
+for (l in unique(d.flows$lang)) {
+  cat('processing lang', l, '...\n')
+  d <- subset(d.flows, lang == l, select=-lang)
 
-d <- read.csv('../data/x_contrib_flows_yyyymm.csv')
-d <- subset(d, lang == l)
-summary(d)
+  m <- lm(distance_ratio ~ contrib_ratio, data=d)
+  print(summary(m))
 
-m <- lm(distance_mean_weighted ~ distance_mean, data=d)
-summary(m)
+  plot(distance_ratio ~ contrib_ratio, data=d, pch=20, col='black', cex=1.5,
+       main=l, xlab='Contributions per path', ylab='Weighted distance over mean distance')
+  abline(m, col='red')
 
-plot(distance_mean ~ distance_mean_weighted, data=d, xlim=c(min(d[,5:6]), max(d[,5:6])))
-abline(m, col='red')
-abline(a = 0, b = 1, col='blue')
-
-m<- lm(distance_ratio ~ contrib_ratio, data=d)
-summary(m)
-plot(distance_ratio ~ contrib_ratio, data=d)
+  # [1] "adj.r.squared" "aliased"       "call"          "coefficients" 
+  # [5] "cov.unscaled"  "df"            "fstatistic"    "r.squared"    
+  # [9] "residuals"     "sigma"         "terms"        
+  print(summary(m)$coefficients)  
+  mtext(sprintf("R2=%0.3f beta=%0.3f +- %0.3f n=%d", 
+                summary(m)$adj.r.squared, 
+                summary(m)$coefficients[2,1], 
+                summary(m)$coefficients[2,2],
+                nrow(d)), 3)
+}
+results
