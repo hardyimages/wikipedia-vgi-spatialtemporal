@@ -1,3 +1,4 @@
+labels <- c('en'='English')
 cat('processing lang', l, 'from', nrow(d.flows), 'records...\n')
 d <- subset(d.flows, lang == l, select=-lang)
 cat('  extracted', nrow(d), 'records for', sum(d$n_contrib), 'contributions...\n')
@@ -13,9 +14,15 @@ cat('  d.sd', sd(d$distance_ratio), '...\n')
 cat('  d.se', sd(d$distance_ratio)/sqrt(length(d$distance_ratio)), '...\n')
 cat('  d.n', length(d$distance_ratio), '...\n')
 
+pdf(file='Rplots.pdf', width=7, height=7, onefile=T, pointsize=18)
 with(d, {
-  plot(density(distance_ratio), main=l, xlab='Distance ratio')
+  plot(density(distance_ratio), main=labels[[l]], xlab='Distance ratio per month')
   abline(v=mean(distance_ratio), lty=2)
+  mtext(sprintf('mean = %0.3f +/- %0.3f SE (n = %d; %d - %d)', 
+                mean(distance_ratio), 
+                sd(distance_ratio)/sqrt(length(distance_ratio)), 
+                length(distance_ratio),
+                min(yyyy), max(yyyy)), 3, cex=0.8)
   print(density(distance_ratio))
 })
 
@@ -26,3 +33,5 @@ results[[l]] <- list('r2'=summary(m)$adj.r.squared,
      'd.sd'=sd(d$distance_ratio), 
      'd.se'=sd(d$distance_ratio)/sqrt(length(d$distance_ratio)), 
      'd.n'=length(d$distance_ratio))
+     
+dev.off()
