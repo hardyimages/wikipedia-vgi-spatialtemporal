@@ -1,4 +1,4 @@
-# export PGDATABASE=hardy_dev
+# export PGDATABASE=hardy_db
 # 
 # echo '\copy (select distinct yyyy, mm, lang from contrib_by_month order by lang, yyyy, mm) to stdout with csv header' | psql -Xq | while read x; do
 #     y=`echo $x | cut -d, -f1`
