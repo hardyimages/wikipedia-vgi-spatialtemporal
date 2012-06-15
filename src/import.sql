@@ -13,7 +13,6 @@ CREATE TABLE contrib_by_month (
     contrib_y DOUBLE PRECISION,
     contrib_n INTEGER
 );
-ALTER TABLE contrib_by_month ADD PRIMARY KEY (yyyy, mm, lang, article_id, contrib_x, contrib_y);
 
 \copy contrib_by_month from '../data/x_contrib_by_month.csv' with csv header
 
@@ -26,17 +25,9 @@ SELECT    yyyy, mm, lang,
           round(article_y)::integer AS article_y,
           round(contrib_x)::integer AS contrib_x,
           round(contrib_y)::integer AS contrib_y,
-          SUM(contrib_n) AS contrib_n,
-          COUNT(*) AS article_n
+          contrib_n AS contrib_n
 FROM      contrib_by_month
-GROUP BY  yyyy, mm, lang, 
-          round(article_x), 
-          round(article_y), 
-          round(contrib_x), 
-          round(contrib_y)
 ;
-
-ALTER TABLE contrib_by_month_k1 ADD PRIMARY KEY (yyyy, mm, lang, article_x, article_y, contrib_x, contrib_y);
 
 
 drop table if exists contrib_by_month_k5 CASCADE;
@@ -46,17 +37,9 @@ SELECT    yyyy, mm, lang,
           5*round(article_y/5.0)::integer AS article_y,
           5*round(contrib_x/5.0)::integer AS contrib_x,
           5*round(contrib_y/5.0)::integer AS contrib_y,
-          SUM(contrib_n) AS contrib_n,
-          COUNT(*) AS article_n
+          contrib_n
 FROM      contrib_by_month
-GROUP BY  yyyy, mm, lang, 
-          5*round(article_x/5.0), 
-          5*round(article_y/5.0), 
-          5*round(contrib_x/5.0), 
-          5*round(contrib_y/5.0)
 ;
-
-ALTER TABLE contrib_by_month_k5 ADD PRIMARY KEY (yyyy, mm, lang, article_x, article_y, contrib_x, contrib_y);
 
 
 drop table if exists contrib_by_month_k10 CASCADE;
@@ -66,14 +49,6 @@ SELECT    yyyy, mm, lang,
           10*round(article_y/10.0)::integer AS article_y,
           10*round(contrib_x/10.0)::integer AS contrib_x,
           10*round(contrib_y/10.0)::integer AS contrib_y,
-          SUM(contrib_n) AS contrib_n,
-          COUNT(*) AS article_n
+          contrib_n
 FROM      contrib_by_month
-GROUP BY  yyyy, mm, lang, 
-          10*round(article_x/10.0), 
-          10*round(article_y/10.0), 
-          10*round(contrib_x/10.0), 
-          10*round(contrib_y/10.0)
 ;
-
-ALTER TABLE contrib_by_month_k10 ADD PRIMARY KEY (yyyy, mm, lang, article_x, article_y, contrib_x, contrib_y);
