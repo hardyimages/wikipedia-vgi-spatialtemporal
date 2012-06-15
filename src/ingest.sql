@@ -5,7 +5,7 @@ set role to hardy;
 -- create all unique locations
 DROP TABLE IF EXISTS contrib_nodes;
 CREATE TABLE contrib_nodes AS
-SELECT      x, y
+SELECT      x, y, COUNT(*) AS n
 FROM        (
   SELECT      article_x AS x, article_y AS y
   FROM        contrib_by_month_k1

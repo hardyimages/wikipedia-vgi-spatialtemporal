@@ -21,7 +21,6 @@ SELECT    lang, yyyy, mm,
           SUM(contrib_n) AS n_contrib,
           (SUM(contrib_n * distance_km)/SUM(contrib_n))/AVG(distance_km) AS distance_ratio,
           SUM(1.0*contrib_n)/COUNT(*) AS contrib_ratio
-          
 FROM      contrib_flows t
 JOIN      contrib_paths p1 USING (path_id)
 GROUP BY  lang, yyyy, mm
