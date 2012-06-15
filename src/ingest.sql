@@ -41,7 +41,7 @@ GROUP BY    t1.node_id, t2.node_id
 ALTER TABLE contrib_paths ADD COLUMN path_id serial NOT NULL PRIMARY KEY;
 ALTER TABLE contrib_paths ADD CONSTRAINT ux_contrib_paths UNIQUE(node_id_src, node_id_dst);
 ALTER TABLE contrib_paths ADD COLUMN geo_linestring GEOGRAPHY(LINESTRING, 4326);
-ALTER TABLE contrib_paths ADD COLUMN distance_km DOUBLE PRECISION;
+ALTER TABLE contrib_paths ADD COLUMN distance_km INTEGER;
 
 select count(*) from contrib_paths;
 
@@ -53,6 +53,6 @@ WHERE     n1.node_id = p.node_id_src AND
 ;
 
 UPDATE    contrib_paths p
-SET       distance_km = ST_Length(geo_linestring)/1000.0
+SET       distance_km = round(ST_Length(geo_linestring)/1000.0)
 ;
 

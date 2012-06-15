@@ -16,10 +16,11 @@ DROP TABLE IF EXISTS contrib_flows_yyyymm;
 CREATE TABLE contrib_flows_yyyymm AS
 SELECT    lang, yyyy, mm, 
           COUNT(*) AS n_path,
-          SUM(contrib_n * distance_km)/SUM(contrib_n) AS distance_mean_weighted,
-          AVG(distance_km) AS distance_mean,
+          ROUND(SUM(contrib_n * distance_km)/SUM(contrib_n)) AS distance_mean_weighted,
+          ROUND(AVG(distance_km)) AS distance_mean,
           SUM(contrib_n) AS n_contrib,
-          (SUM(contrib_n * distance_km)/SUM(contrib_n))/AVG(distance_km) AS distance_ratio,
+          CASE WHEN AVG(distance_km) < 1 THEN 0 ELSE
+            (SUM(contrib_n * distance_km)/SUM(contrib_n))/AVG(distance_km) END AS distance_ratio,
           SUM(1.0*contrib_n)/COUNT(*) AS contrib_ratio
 FROM      contrib_flows t
 JOIN      contrib_paths p1 USING (path_id)
@@ -34,10 +35,11 @@ CREATE TABLE contrib_flows_yyyy AS
 SELECT    lang, yyyy, 
           COUNT(*) AS n_path,
           COUNT(DISTINCT mm) AS n_month,
-          SUM(contrib_n * distance_km)/SUM(contrib_n) AS distance_mean_weighted,
-          AVG(distance_km) AS distance_mean,
+          ROUND(SUM(contrib_n * distance_km)/SUM(contrib_n)) AS distance_mean_weighted,
+          ROUND(AVG(distance_km)) AS distance_mean,
           SUM(contrib_n) AS n_contrib,
-          (SUM(contrib_n * distance_km)/SUM(contrib_n))/AVG(distance_km) AS distance_ratio,
+          CASE WHEN AVG(distance_km) < 1 THEN 0 ELSE
+          (SUM(contrib_n * distance_km)/SUM(contrib_n))/AVG(distance_km) END AS distance_ratio,
           SUM(1.0*contrib_n)/COUNT(*) AS contrib_ratio
 FROM      contrib_flows t
 JOIN      contrib_paths p1 USING (path_id)
