@@ -45,18 +45,18 @@ GROUP BY  yyyy, mm, lang,
 drop table if exists contrib_by_month_k1;
 create table contrib_by_month_k1 as
 SELECT    yyyy, mm, lang, 
-          1.0*round(article_x/1.0) AS article_x,
-          1.0*round(article_y/1.0) AS article_y,
-          1.0*round(contrib_x/1.0) AS contrib_x,
-          1.0*round(contrib_y/1.0) AS contrib_y,
+          round(article_x)::integer AS article_x,
+          round(article_y)::integer AS article_y,
+          round(contrib_x)::integer AS contrib_x,
+          round(contrib_y)::integer AS contrib_y,
           SUM(contrib_n) AS contrib_n,
           COUNT(*) AS article_n
 FROM      contrib_by_month
 GROUP BY  yyyy, mm, lang, 
-          1.0*round(article_x/1.0), 
-          1.0*round(article_y/1.0), 
-          1.0*round(contrib_x/1.0), 
-          1.0*round(contrib_y/1.0)
+          round(article_x), 
+          round(article_y), 
+          round(contrib_x), 
+          round(contrib_y)
 ;
 
 ALTER TABLE contrib_by_month_k1 ADD PRIMARY KEY (yyyy, mm, lang, article_x, article_y, contrib_x, contrib_y);
@@ -65,18 +65,18 @@ ALTER TABLE contrib_by_month_k1 ADD PRIMARY KEY (yyyy, mm, lang, article_x, arti
 drop table if exists contrib_by_month_k5;
 create table contrib_by_month_k5 as
 SELECT    yyyy, mm, lang, 
-          5.0*round(article_x/5.0) AS article_x,
-          5.0*round(article_y/5.0) AS article_y,
-          5.0*round(contrib_x/5.0) AS contrib_x,
-          5.0*round(contrib_y/5.0) AS contrib_y,
+          5*round(article_x/5.0)::integer AS article_x,
+          5*round(article_y/5.0)::integer AS article_y,
+          5*round(contrib_x/5.0)::integer AS contrib_x,
+          5*round(contrib_y/5.0)::integer AS contrib_y,
           SUM(contrib_n) AS contrib_n,
           COUNT(*) AS article_n
 FROM      contrib_by_month
 GROUP BY  yyyy, mm, lang, 
-          5.0*round(article_x/5.0), 
-          5.0*round(article_y/5.0), 
-          5.0*round(contrib_x/5.0), 
-          5.0*round(contrib_y/5.0)
+          5*round(article_x/5.0), 
+          5*round(article_y/5.0), 
+          5*round(contrib_x/5.0), 
+          5*round(contrib_y/5.0)
 ;
 
 ALTER TABLE contrib_by_month_k5 ADD PRIMARY KEY (yyyy, mm, lang, article_x, article_y, contrib_x, contrib_y);
@@ -85,20 +85,18 @@ ALTER TABLE contrib_by_month_k5 ADD PRIMARY KEY (yyyy, mm, lang, article_x, arti
 drop table if exists contrib_by_month_k10;
 create table contrib_by_month_k10 as
 SELECT    yyyy, mm, lang, 
-          10.0*round(article_x/10.0) AS article_x,
-          10.0*round(article_y/10.0) AS article_y,
-          10.0*round(contrib_x/10.0) AS contrib_x,
-          10.0*round(contrib_y/10.0) AS contrib_y,
+          10*round(article_x/10.0)::integer AS article_x,
+          10*round(article_y/10.0)::integer AS article_y,
+          10*round(contrib_x/10.0)::integer AS contrib_x,
+          10*round(contrib_y/10.0)::integer AS contrib_y,
           SUM(contrib_n) AS contrib_n,
           COUNT(*) AS article_n
 FROM      contrib_by_month
 GROUP BY  yyyy, mm, lang, 
-          10.0*round(article_x/10.0), 
-          10.0*round(article_y/10.0), 
-          10.0*round(contrib_x/10.0), 
-          10.0*round(contrib_y/10.0)
+          10*round(article_x/10.0), 
+          10*round(article_y/10.0), 
+          10*round(contrib_x/10.0), 
+          10*round(contrib_y/10.0)
 ;
 
 ALTER TABLE contrib_by_month_k10 ADD PRIMARY KEY (yyyy, mm, lang, article_x, article_y, contrib_x, contrib_y);
-
-
