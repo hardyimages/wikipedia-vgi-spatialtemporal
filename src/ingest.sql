@@ -8,12 +8,12 @@ CREATE TABLE contrib_nodes AS
 SELECT      x, y
 FROM        (
   SELECT      article_x AS x, article_y AS y
-  FROM        contrib_by_month
+  FROM        contrib_by_month_k1
 
   UNION
   
   SELECT      contrib_x AS x, contrib_y AS y
-  FROM        contrib_by_month
+  FROM        contrib_by_month_k1
 ) t
 GROUP BY x, y
 ;
@@ -32,7 +32,7 @@ DROP TABLE IF EXISTS contrib_paths;
 CREATE TABLE contrib_paths AS
 SELECT      t1.node_id AS node_id_src,
             t2.node_id AS node_id_dst
-FROM        contrib_by_month t
+FROM        contrib_by_month_k1 t
 JOIN        contrib_nodes t1 ON (t1.x = t.contrib_x AND t1.y = t.contrib_y)
 JOIN        contrib_nodes t2 ON (t2.x = t.article_x AND t2.y = t.article_y)
 GROUP BY    t1.node_id, t2.node_id

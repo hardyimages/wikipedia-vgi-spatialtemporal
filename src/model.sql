@@ -4,7 +4,7 @@ set role to hardy;
 DROP TABLE IF EXISTS contrib_flows;
 CREATE TABLE contrib_flows AS
 SELECT    lang, yyyy, mm, path_id, contrib_n
-FROM      contrib_by_month t
+FROM      contrib_by_month_k1 t
 JOIN      contrib_nodes t1 ON (t1.x = t.contrib_x AND t1.y = t.contrib_y)
 JOIN      contrib_nodes t2 ON (t2.x = t.article_x AND t2.y = t.article_y)
 JOIN      contrib_paths p1 ON (p1.node_id_src = t1.node_id AND p1.node_id_dst = t2.node_id)
