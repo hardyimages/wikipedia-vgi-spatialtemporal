@@ -40,7 +40,7 @@ for lang in ["ca", "cs", "da", "de", "en", "eo", "es", "fi", "fr", "is", "it", "
                 print 'processing', lang, yr, month
                 nodes = {}
                 edges = []
-                sql = '''SELECT * FROM v_contrib_by_month_k5 WHERE lang = '%s' AND yyyy = %d AND mm = %d AND contrib_n >= %d''' % (lang, yr, month, filter_contrib_n)
+                sql = '''SELECT * FROM contrib_by_month_k5 WHERE lang = '%s' AND yyyy = %d AND mm = %d AND contrib_n >= %d''' % (lang, yr, month, filter_contrib_n)
                 cur.execute(sql)
                 for row in cur.fetchall():
                     row['contrib_n'] = int(row['contrib_n'])
