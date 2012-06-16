@@ -5,22 +5,23 @@ set role to hardy;
 -- create all unique locations
 DROP TABLE IF EXISTS contrib_nodes;
 CREATE TABLE contrib_nodes AS
-SELECT      x, y, COUNT(*) AS n
+SELECT      x, y, dir::char(1), count(*)
 FROM        (
-  SELECT      article_x AS x, article_y AS y
-  FROM        contrib_by_month_k1
+  SELECT      article_x AS x, article_y AS y, 'I' as dir
+  FROM        contrib_by_month
 
   UNION
   
-  SELECT      contrib_x AS x, contrib_y AS y
-  FROM        contrib_by_month_k1
+  SELECT      contrib_x AS x, contrib_y AS y, 'O' as dir
+  FROM        contrib_by_month
 ) t
-GROUP BY x, y
+GROUP BY x, y, dir
 ;
 
 ALTER TABLE contrib_nodes ADD COLUMN node_id serial NOT NULL PRIMARY KEY;
-ALTER TABLE contrib_nodes ADD CONSTRAINT ux_contrib_nodes UNIQUE(x, y);
+ALTER TABLE contrib_nodes ADD CONSTRAINT ux_contrib_nodes UNIQUE(x, y, dir);
 ALTER TABLE contrib_nodes ADD COLUMN geo_point GEOGRAPHY(POINT, 4326);
+ALTER TABLE contrib_nodes ADD COLUMN cluster_id integer NOT NULL DEFAULT 0;
 
 UPDATE      contrib_nodes n
 SET         geo_point = ST_MakePoint(x, y)
@@ -32,9 +33,9 @@ DROP TABLE IF EXISTS contrib_paths;
 CREATE TABLE contrib_paths AS
 SELECT      t1.node_id AS node_id_src,
             t2.node_id AS node_id_dst
-FROM        contrib_by_month_k1 t
-JOIN        contrib_nodes t1 ON (t1.x = t.contrib_x AND t1.y = t.contrib_y)
-JOIN        contrib_nodes t2 ON (t2.x = t.article_x AND t2.y = t.article_y)
+FROM        contrib_by_month t
+JOIN        contrib_nodes t1 ON (t1.x = t.contrib_x AND t1.y = t.contrib_y AND t1.dir = 'O')
+JOIN        contrib_nodes t2 ON (t2.x = t.article_x AND t2.y = t.article_y AND t2.dir = 'I')
 GROUP BY    t1.node_id, t2.node_id
 ;
 
