@@ -22,9 +22,17 @@ ALTER TABLE contrib_nodes ADD COLUMN node_id serial NOT NULL PRIMARY KEY;
 ALTER TABLE contrib_nodes ADD CONSTRAINT ux_contrib_nodes UNIQUE(x, y, dir);
 ALTER TABLE contrib_nodes ADD COLUMN geo_point GEOGRAPHY(POINT, 4326);
 ALTER TABLE contrib_nodes ADD COLUMN cluster_id integer NOT NULL DEFAULT 0;
+ALTER TABLE contrib_nodes ADD COLUMN popdens00 integer;
 
 UPDATE      contrib_nodes n
 SET         geo_point = ST_MakePoint(x, y)
+;
+
+UPDATE      contrib_nodes n
+SET         popdens00 = t.popdens00
+FROM        contrib_nodes_popdens00 t
+WHERE       n.node_id = t.node_id AND n.dir = t.dir
+RETURNING *
 ;
 
 

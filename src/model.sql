@@ -4,13 +4,29 @@ set role to hardy;
 DROP TABLE IF EXISTS contrib_flows;
 CREATE TABLE contrib_flows AS
 SELECT    lang, yyyy, mm, path_id, contrib_n
-FROM      contrib_by_month_k1 t
+FROM      contrib_by_month t
 JOIN      contrib_nodes t1 ON (t1.x = t.contrib_x AND t1.y = t.contrib_y AND t1.dir = 'O')
 JOIN      contrib_nodes t2 ON (t2.x = t.article_x AND t2.y = t.article_y AND t2.dir = 'I')
 JOIN      contrib_paths p1 ON (p1.node_id_src = t1.node_id AND p1.node_id_dst = t2.node_id)
 ;
 
 ALTER TABLE contrib_flows ADD COLUMN flow_id serial NOT NULL PRIMARY KEY;
+
+
+DROP TABLE IF EXISTS contrib_flows_raw;
+CREATE TABLE contrib_flows_raw AS
+SELECT    lang, yyyy, mm,
+          contrib_n AS n, 
+          distance_km AS d, 
+          t1.popdens00 AS pop_src, 
+          t2.popdens00 AS pop_dst
+FROM      contrib_flows t
+JOIN      contrib_paths p1 USING (path_id)
+JOIN      contrib_nodes t1 ON (p1.node_id_src = t1.node_id)
+JOIN      contrib_nodes t2 ON (p1.node_id_dst = t2.node_id)
+ORDER BY lang, yyyy, mm, contrib_n, distance_km
+;
+
 
 DROP TABLE IF EXISTS contrib_flows_yyyymm;
 CREATE TABLE contrib_flows_yyyymm AS
