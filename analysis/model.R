@@ -1,4 +1,5 @@
 require(reshape)
+require(xtable)
 require(stringr)
 require(mgcv)
 
@@ -19,15 +20,27 @@ dev.off()
 ##
 #
 d.flows <- read.csv('data/x_contrib_flows_raw.csv')
-r <- list()
+r <- NULL
 for (l in unique(levels(d.flows$lang))) {
   d <- subset(d.flows, lang == l, select=-lang)
-  m <- gam(pop_dst ~ pop_src + log10(d+1), data=d)
-  print(l)
-  print(summary(m))
-  r[[l]] <- list(model=m, n=nrow(d))
+  d$log10_d <- log10(d$d + 1)
+  m <- gam(pop_dst ~ pop_src + log10_d, data=d)
+  r <- rbind(r, data.frame(lang=lang.labels[[l]], 
+        n=summary(m)$n,
+        r2=summary(m)$r.sq, 
+        beta.1=coef(m)[['pop_src']], 
+        se.1=summary(m)$se[['pop_src']],
+        t.1=summary(m)$p.t[['pop_src']],
+        pv.1=summary(m)$p.pv[['pop_src']],
+        beta.2=coef(m)[['log10_d']], 
+        se.2=summary(m)$se[['log10_d']],
+        t.2=summary(m)$p.t[['log10_d']],
+        pv.2=summary(m)$p.pv[['log10_d']]))
 }
-r
+rownames(r) <- r$lang
+r <- r[order(-r$n),-1]
+write.csv(r, '_xtable_flows.csv')
+xtable(r, digits=3)
 
 # lm(formula = pop_dst ~ pop_src + log(d + 1) + 0, data = z)
 # 
