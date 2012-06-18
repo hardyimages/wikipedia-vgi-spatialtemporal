@@ -1,44 +1,64 @@
 require(reshape)
 require(xtable)
 require(stringr)
-require(mgcv)
 
 d.lang <- read.table('../lang.txt', header=T)
 lang.labels <- as.character(d.lang$name)
 names(lang.labels) <- str_trim(tolower(as.character(d.lang$alpha2)))
-d.flows <- read.csv('data/x_contrib_flows_yyyymm.csv')
-head(d.flows)
-results <- list()
-pdf(file='Rplots.pdf', width=7, height=7, onefile=T, pointsize=18)
-for (l in unique(d.flows$lang)) {
-  source('model-lang.R')
+
+if (FALSE) {
+  d.flows <- read.csv('data/x_contrib_flows_yyyymm.csv')
+  head(d.flows)
+  results <- list()
+  pdf(file='Rplots.pdf', width=7, height=7, onefile=T, pointsize=18)
+  for (l in unique(d.flows$lang)) {
+    source('model-lang.R')
+  }
+  save(file='_results.RDdata', results)
+  dev.off()
 }
-save(file='_results.RDdata', results)
-dev.off()
 
 
 ##
 #
 d.flows <- read.csv('data/x_contrib_flows_raw.csv')
+d.flows$log10_d <- log10(d.flows$d + 1)
 r <- NULL
 for (l in unique(levels(d.flows$lang))) {
-  d <- subset(d.flows, lang == l, select=-lang)
-  d$log10_d <- log10(d$d + 1)
-  m <- gam(pop_dst ~ pop_src + log10_d, data=d)
-  r <- rbind(r, data.frame(lang=lang.labels[[l]], 
-        n=summary(m)$n,
-        r2=summary(m)$r.sq, 
-        beta.1=coef(m)[['pop_src']], 
-        se.1=summary(m)$se[['pop_src']],
-        t.1=summary(m)$p.t[['pop_src']],
-        pv.1=summary(m)$p.pv[['pop_src']],
-        beta.2=coef(m)[['log10_d']], 
-        se.2=summary(m)$se[['log10_d']],
-        t.2=summary(m)$p.t[['log10_d']],
-        pv.2=summary(m)$p.pv[['log10_d']]))
+  d.lang <- subset(d.flows, lang == l, select=-lang)
+  m <- lm(pop_dst ~ pop_src + log10_d, data=d.lang)
+  r <- rbind(r, data.frame(lang=lang.labels[[l]], yyyy=0,
+        n=nrow(d.lang),
+        r2=summary(m)$adj.r.squared, 
+        beta.pop_src=summary(m)$coefficients['pop_src','Estimate'], 
+        se.pop_src=summary(m)$coefficients['pop_src','Std. Error'], 
+        t.pop_src=summary(m)$coefficients['pop_src','t value'], 
+        pv.pop_src=summary(m)$coefficients['pop_src','Pr(>|t|)'], 
+        beta.d=summary(m)$coefficients['log10_d','Estimate'], 
+        se.d=summary(m)$coefficients['log10_d','Std. Error'], 
+        t.d=summary(m)$coefficients['log10_d','t value'], 
+        pv.d=summary(m)$coefficients['log10_d','Pr(>|t|)']))
+  
+  for (yr in unique(d.lang$yyyy)) {
+    d <- subset(d.lang, yyyy == yr, select=-yyyy)
+    if (length(unique(d$mm)) == 12) {
+      m <- lm(pop_dst ~ pop_src + log10_d, data=d)
+      r <- rbind(r, data.frame(lang=lang.labels[[l]], yyyy=yr,
+            n=nrow(d),
+            r2=summary(m)$adj.r.squared, 
+            beta.pop_src=summary(m)$coefficients['pop_src','Estimate'], 
+            se.pop_src=summary(m)$coefficients['pop_src','Std. Error'], 
+            t.pop_src=summary(m)$coefficients['pop_src','t value'], 
+            pv.pop_src=summary(m)$coefficients['pop_src','Pr(>|t|)'], 
+            beta.d=summary(m)$coefficients['log10_d','Estimate'], 
+            se.d=summary(m)$coefficients['log10_d','Std. Error'], 
+            t.d=summary(m)$coefficients['log10_d','t value'], 
+            pv.d=summary(m)$coefficients['log10_d','Pr(>|t|)']))
+    }
+  }
 }
-rownames(r) <- r$lang
-r <- r[order(-r$n),-1]
+rownames(r) <- NULL
+r <- r[order(r$lang, r$yyyy),]
 write.csv(r, '_xtable_flows.csv')
 xtable(r, digits=3)
 
