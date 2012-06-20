@@ -4,7 +4,7 @@ require(stringr)
 
 d.lang <- read.table('../lang.txt', header=T)
 lang.labels <- as.character(d.lang$name)
-names(lang.labels) <- str_trim(tolower(as.character(d.lang$alpha2)))
+names(lang.labels) <- as.character(d.lang$alpha2)
 
 if (FALSE) {
   d.flows <- read.csv('../data/x_contrib_flows_yyyymm.csv')
@@ -39,12 +39,17 @@ d.flows$log10_d <- log10(d.flows$d + 1)
 r <- NULL
 rr <- NULL
 for (l in sort(lang.labels[unique(levels(d.flows$lang))])) {
+  print(l)
   ll <- names(lang.labels)[lang.labels == l]
+  print(ll)
   d.lang <- subset(d.flows, lang == ll, select=-lang)
+  print(nrow(d.lang))
   for (yr in unique(d.lang$yyyy)) {
     d <- subset(d.lang, yyyy == yr, select=-yyyy)
-    if (length(unique(d$mm)) == 12 && nrow(d) >= 100) {
+    print(nrow(d))
+    if (length(unique(d$mm)) == 12 && nrow(d) >= 100) { # enforce min n=100 and 12 months      
       m <- lm(pop_dst ~ pop_src + log10_d, data=d)
+      # print(summary(m))
       rr <- rbind(rr, data.frame(lang=l, yyyy=yr,
             n=nrow(d),
             n.n=sum(d$n),
@@ -60,7 +65,7 @@ for (l in sort(lang.labels[unique(levels(d.flows$lang))])) {
     }
   }
   m <- lm(pop_dst ~ pop_src + log10_d, data=d.lang)
-  print(summary(m))
+  # print(summary(m))
   r <- rbind(r, data.frame(lang=l, yyyy=NA,
         n=nrow(d.lang),
         n.n=sum(d.lang$n),
@@ -73,8 +78,18 @@ for (l in sort(lang.labels[unique(levels(d.flows$lang))])) {
         se.d=summary(m)$coefficients['log10_d','Std. Error'], 
         t.d=summary(m)$coefficients['log10_d','t value'], 
         pv.d=summary(m)$coefficients['log10_d','Pr(>|t|)']))
+  
+  pdf(file=sprintf('_%s.pdf', l))
+
+  z <- ifelse(d.lang$pop_dst==0,0,log10(d.lang$pop_src+1) / log10(d.lang$pop_dst + 1))
+  z <- na.omit(z)
+  plot(density(z), 
+      main=l, xlab='Ratio of log10(population density)\n(Contributors:Articles)', ylab='', lwd=2)
+  dev.off()
 
 }
+r
+rr
 rownames(r) <- r$lang
 rownames(rr) <- paste(rr$lang, rr$yyyy)
 write.csv(rbind(r, rr), '_xtable_flows.csv')
@@ -91,7 +106,7 @@ rr <- rr[order(rr$lang, rr$yyyy),]
 rr <- rr[,c(6,10,14,5)]
 summary(rr)
 xtable(rr, digits=3)
-q()
+
 # lm(formula = pop_dst ~ pop_src + log(d + 1) + 0, data = z)
 # 
 # Residuals:
