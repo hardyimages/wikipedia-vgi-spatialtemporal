@@ -34,8 +34,16 @@ pv.to.str <- function(x) {
 }
 ##
 #
-d.flows <- read.csv('../data/x_contrib_flows_raw.csv')
-d.flows$log10_d <- log10(d.flows$d + 1)
+d.flows <- within(read.csv('data/x_contrib_flows_raw.csv'), {
+  log10_d <- log10(d + 1)
+  log10_pop_src <- log10(pop_src)
+  log10_pop_dst <- ifelse(is.na(pop_dst), log10(pop_dst), 1)
+  log10_pop_ratio <- log10_pop_src/log10_pop_dst
+})
+
+
+
+
 r <- NULL
 rr <- NULL
 for (l in sort(lang.labels[unique(levels(d.flows$lang))])) {
@@ -44,10 +52,20 @@ for (l in sort(lang.labels[unique(levels(d.flows$lang))])) {
   print(ll)
   d.lang <- subset(d.flows, lang == ll, select=-lang)
   print(nrow(d.lang))
+  dp <- list()
+  xlim <- c(0, 1)
+  ylim <- c(0, 1)
   for (yr in unique(d.lang$yyyy)) {
     d <- subset(d.lang, yyyy == yr, select=-yyyy)
-    print(nrow(d))
+    k.yr <- as.character(yr)
     if (length(unique(d$mm)) == 12 && nrow(d) >= 100) { # enforce min n=100 and 12 months      
+      dp[[k.yr]] <- density(d$log10_d)
+      xlim[1] <- min(xlim[1], min(dp[[k.yr]]$x))
+      ylim[1] <- min(ylim[1], min(dp[[k.yr]]$y))
+      xlim[2] <- max(xlim[2], max(dp[[k.yr]]$x))
+      ylim[2] <- max(ylim[2], max(dp[[k.yr]]$y))
+      
+      
       m <- lm(pop_dst ~ pop_src + log10_d, data=d)
       # print(summary(m))
       rr <- rbind(rr, data.frame(lang=l, yyyy=yr,
@@ -64,6 +82,7 @@ for (l in sort(lang.labels[unique(levels(d.flows$lang))])) {
             pv.d=summary(m)$coefficients['log10_d','Pr(>|t|)']))
     }
   }
+  print(summary(dp))
   m <- lm(pop_dst ~ pop_src + log10_d, data=d.lang)
   # print(summary(m))
   r <- rbind(r, data.frame(lang=l, yyyy=NA,
@@ -79,8 +98,24 @@ for (l in sort(lang.labels[unique(levels(d.flows$lang))])) {
         t.d=summary(m)$coefficients['log10_d','t value'], 
         pv.d=summary(m)$coefficients['log10_d','Pr(>|t|)']))
   
-  pdf(file=sprintf('_%s.pdf', l))
 
+  # dm <- matrix(unlist(dp), nrow=(length(unlist(dp))/length(dp)/2)*length(dp), ncol=2, byrow=F)
+  if (length(dp) > 1) {
+    pdf(file=sprintf('_%s_temporal.pdf', l))
+    cat('xlim', xlim, 'ylim', ylim, '\n')
+    print(dp[[1]]$x)
+    print(dp[[1]]$y)
+    plot(x=dp[[1]]$x, dp[[1]]$y, lty=1, xlim=xlim, ylim=ylim, main=l, xlab='', ylab='')
+    for (ii in 2:length(dp)) {
+      print(dp[[ii]]$x)
+      lines(x=dp[[ii]]$x, y=dp[[ii]]$y, pch=20, cex=0.5)
+    }
+    dev.off()
+    
+  }
+  
+  pdf(file=sprintf('_%s.pdf', l))
+  
   z <- ifelse(d.lang$pop_dst==0,0,log10(d.lang$pop_src+1) / log10(d.lang$pop_dst + 1))
   z <- na.omit(z)
   plot(density(z), 
