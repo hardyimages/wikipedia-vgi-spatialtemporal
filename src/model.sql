@@ -13,6 +13,20 @@ JOIN      contrib_paths p1 ON (p1.node_id_src = t1.node_id AND p1.node_id_dst = 
 ALTER TABLE contrib_flows ADD COLUMN flow_id serial NOT NULL PRIMARY KEY;
 
 
+DROP TABLE IF EXISTS contrib_by_src_yyyymm;
+CREATE TABLE contrib_by_src_yyyymm AS
+SELECT    lang, yyyy, mm, x, y,
+          count(*) AS n_a, 
+          sum(contrib_n) AS n_c, 
+          sum(contrib_n*distance_km)/sum(contrib_n) AS d_w,
+          round(avg(distance_km)) AS d
+FROM      contrib_flows t
+JOIN      contrib_paths p1 USING (path_id)
+JOIN      contrib_nodes t1 ON (p1.node_id_src = t1.node_id)
+GROUP BY lang, yyyy, mm, x, y
+ORDER BY lang, yyyy, mm, x, y
+;
+
 DROP TABLE IF EXISTS contrib_flows_raw;
 CREATE TABLE contrib_flows_raw AS
 SELECT    lang, yyyy, mm,
